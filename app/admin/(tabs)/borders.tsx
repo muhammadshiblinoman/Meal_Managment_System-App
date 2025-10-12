@@ -92,10 +92,22 @@ export default function Borders() {
   };
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={[
-      styles.userCard,
-      item.status === "blocked" && styles.blockedUserCard
-    ]}>
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() =>
+        router.push({
+          pathname: "/screens/editUser",
+          params: {
+            uid: item.uid,
+            moderator: "admin"
+          },
+        })
+      }
+      style={[
+        styles.userCard,
+        item.status === "blocked" && styles.blockedUserCard
+      ]}
+    >
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.userName}>{item.name}</Text>
@@ -123,7 +135,7 @@ export default function Borders() {
         
         <View style={styles.detailRow}>
           <Text style={styles.detailIcon}>🏠</Text>
-          <Text style={styles.detailText}>Room {item.room}</Text>
+          <Text style={styles.detailText}>Room No : {item.room}</Text>
         </View>
         
         <View style={styles.detailRow}>
@@ -176,22 +188,6 @@ export default function Borders() {
             {item.role === "admin" ? "Demote" : "Promote"}
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() =>
-            router.push({
-              pathname: "/screens/editUser",
-              params: { 
-                uid: item.uid,
-                moderator: "admin"
-              },
-            })
-          }
-        >
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDelete(item.uid, item.name)}
@@ -199,7 +195,7 @@ export default function Borders() {
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   if (isLoading) {
@@ -391,10 +387,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   promoteButton: {
-    backgroundColor: "#FF8C42",
+    backgroundColor: "#3B82F6",
   },
   demoteButton: {
-    backgroundColor: "#8B4513",
+    backgroundColor: "#FF8C42",
   },
   roleButtonText: {
     color: "#FFF",
