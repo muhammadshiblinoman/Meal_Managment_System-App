@@ -70,7 +70,7 @@ export default function Index() {
         ]}
       >
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
+          source={require('@/assets/images/food.png')}
           style={styles.image}
           resizeMode="cover"
         />
