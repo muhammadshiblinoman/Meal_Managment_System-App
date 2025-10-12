@@ -8,8 +8,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Fixed date generation function
 const getCurrentMonthDates = () => {
@@ -17,18 +18,18 @@ const getCurrentMonthDates = () => {
   const year = now.getFullYear();
   const month = now.getMonth();
   const dates: string[] = [];
-  
+
   // Get the first day of the month
   const firstDay = new Date(year, month, 1);
   // Get the last day of the month
   const lastDay = new Date(year, month + 1, 0);
-  
+
   // Generate dates for the entire month
   for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
-    const dateString = d.toISOString().split('T')[0];
+    const dateString = d.toISOString().split("T")[0];
     dates.push(dateString);
   }
-  
+
   return dates;
 };
 
@@ -79,7 +80,12 @@ export default function MyMeals() {
   // Count total meals for the month
   const totalMeals = dates.reduce((count, date) => {
     const meal = meals[date] || {};
-    return count + (meal.breakfast ? 1 : 0) + (meal.lunch ? 1 : 0) + (meal.dinner ? 1 : 0);
+    return (
+      count +
+      (meal.breakfast ? 1 : 0) +
+      (meal.lunch ? 1 : 0) +
+      (meal.dinner ? 1 : 0)
+    );
   }, 0);
 
   if (isLoading) {
@@ -92,98 +98,121 @@ export default function MyMeals() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl 
-          refreshing={refreshing} 
-          onRefresh={onRefresh}
-          colors={["#FF8C42"]}
-          tintColor="#FF8C42"
-        />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Meals</Text>
-        <Text style={styles.headerSubtitle}>
-          {new Date().toLocaleString("default", { month: "long", year: "numeric" })}
-        </Text>
-      </View>
-
-      {/* Summary Cards */}
-      <View style={styles.summaryContainer}>
-        <View style={[styles.summaryCard, styles.costCard]}>
-          <Text style={styles.summaryLabel}>Total Cost</Text>
-          <Text style={styles.summaryValue}>৳{totalCost.toFixed(2)}</Text>
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#FF8C42"]}
+            tintColor="#FF8C42"
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>My Meals</Text>
+          <Text style={styles.headerSubtitle}>
+            {new Date().toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            })}
+          </Text>
         </View>
-        
-        <View style={[styles.summaryCard, styles.mealsCard]}>
-          <Text style={styles.summaryLabel}>Total Meals</Text>
-          <Text style={styles.summaryValue}>{totalMeals}</Text>
+
+        {/* Summary Cards */}
+        <View style={styles.summaryContainer}>
+          <View style={[styles.summaryCard, styles.costCard]}>
+            <Text style={styles.summaryLabel}>Total Cost</Text>
+            <Text style={styles.summaryValue}>৳{totalCost.toFixed(2)}</Text>
+          </View>
+
+          <View style={[styles.summaryCard, styles.mealsCard]}>
+            <Text style={styles.summaryLabel}>Total Meals</Text>
+            <Text style={styles.summaryValue}>{totalMeals}</Text>
+          </View>
         </View>
-      </View>
 
-      {/* Meal List */}
-      <View style={styles.mealListContainer}>
-        <Text style={styles.sectionTitle}>Daily Meal Records</Text>
-        
-        {dates.length > 0 ? (
-          dates
-            .filter((date) => meals[date])
-            .map((date) => {
-              const meal = meals[date];
-              const dayCost = meal?.totalExpense ? Number(meal.totalExpense) : 0;
+        {/* Meal List */}
+        <View style={styles.mealListContainer}>
+          <Text style={styles.sectionTitle}>Daily Meal Records</Text>
 
-              return (
-          <View key={date} style={styles.mealCard}>
-            <View style={styles.dateContainer}>
-              <Text style={styles.dateText}>
-                {new Date(date).toLocaleDateString('en-US', {
-            weekday: 'short',
-            day: 'numeric'
-                })}
+          {dates.length > 0 ? (
+            dates
+              .filter((date) => meals[date])
+              .map((date) => {
+                const meal = meals[date];
+                const dayCost = meal?.totalExpense
+                  ? Number(meal.totalExpense)
+                  : 0;
+
+                return (
+                  <View key={date} style={styles.mealCard}>
+                    <View style={styles.dateContainer}>
+                      <Text style={styles.dateText}>
+                        {new Date(date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          day: "numeric",
+                        })}
+                      </Text>
+                      <Text style={styles.fullDateText}>{date}</Text>
+                    </View>
+
+                    <View style={styles.mealsContainer}>
+                      <View style={styles.mealItem}>
+                        <Text style={styles.mealIcon}>🍳</Text>
+                        <Text
+                          style={
+                            meal.breakfast
+                              ? styles.mealPresent
+                              : styles.mealAbsent
+                          }
+                        >
+                          {meal.breakfast ? "Taken" : "Not taken"}
+                        </Text>
+                      </View>
+
+                      <View style={styles.mealItem}>
+                        <Text style={styles.mealIcon}>🍛</Text>
+                        <Text
+                          style={
+                            meal.lunch ? styles.mealPresent : styles.mealAbsent
+                          }
+                        >
+                          {meal.lunch ? "Taken" : "Not taken"}
+                        </Text>
+                      </View>
+
+                      <View style={styles.mealItem}>
+                        <Text style={styles.mealIcon}>🍲</Text>
+                        <Text
+                          style={
+                            meal.dinner ? styles.mealPresent : styles.mealAbsent
+                          }
+                        >
+                          {meal.dinner ? "Taken" : "Not taken"}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.costContainer}>
+                      <Text style={styles.costText}>৳{dayCost.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                );
+              })
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🍽️</Text>
+              <Text style={styles.emptyText}>
+                No meal records found for this month
               </Text>
-              <Text style={styles.fullDateText}>{date}</Text>
             </View>
-
-            <View style={styles.mealsContainer}>
-              <View style={styles.mealItem}>
-                <Text style={styles.mealIcon}>🍳</Text>
-                <Text style={meal.breakfast ? styles.mealPresent : styles.mealAbsent}>
-            {meal.breakfast ? "Taken" : "Not taken"}
-                </Text>
-              </View>
-
-              <View style={styles.mealItem}>
-                <Text style={styles.mealIcon}>🍛</Text>
-                <Text style={meal.lunch ? styles.mealPresent : styles.mealAbsent}>
-            {meal.lunch ? "Taken" : "Not taken"}
-                </Text>
-              </View>
-
-              <View style={styles.mealItem}>
-                <Text style={styles.mealIcon}>🍲</Text>
-                <Text style={meal.dinner ? styles.mealPresent : styles.mealAbsent}>
-            {meal.dinner ? "Taken" : "Not taken"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.costContainer}>
-              <Text style={styles.costText}>৳{dayCost.toFixed(2)}</Text>
-            </View>
-          </View>
-              );
-            })
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🍽️</Text>
-            <Text style={styles.emptyText}>No meal records found for this month</Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -274,7 +303,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#e9ecef",
     borderWidth: 2,
-    
   },
   dateContainer: {
     width: 70,

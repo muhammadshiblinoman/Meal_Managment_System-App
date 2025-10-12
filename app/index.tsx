@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import {
-  Animated,
-  Easing,
-  Image,
-  StyleSheet,
-  Text,
-  View
+    Animated,
+    Easing,
+    Image,
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
 
 export default function Index() {
