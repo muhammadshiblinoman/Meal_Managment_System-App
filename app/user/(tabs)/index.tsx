@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const [notice, setNotice] = useState("");
@@ -45,45 +46,50 @@ export default function Index() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meal Manager</Text>
-        <Text style={styles.headerSubtitle}>User Dashboard</Text>
-      </View>
+    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <ScrollView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Meal Manager</Text>
+          <Text style={styles.headerSubtitle}>User Dashboard</Text>
+        </View>
 
-      {/* Menu Box */}
-      <View style={styles.section}>
-        <MenuBox />
-      </View>
+        {/* Menu Box */}
+        <View style={styles.section}>
+          <MenuBox />
+        </View>
 
-      <MealSelector />
+        <MealSelector />
 
-      {/* Notice */}
-      {showNotice && (
-        <Animated.View style={[styles.noticeBox, { opacity: fadeAnim }]}>
-          <TouchableOpacity onPress={toggleNoticeExpansion} activeOpacity={0.7}>
-            <View style={styles.noticeHeader}>
-              <Text style={styles.noticeIcon}>📢</Text>
-              <Text style={styles.noticeHeading}>Important Notice</Text>
-              <Text style={styles.expandIcon}>
-                {isNoticeExpanded ? "▲" : "▼"}
-              </Text>
-            </View>
-            {(isNoticeExpanded || notice.length < 150) && (
-              <Text style={styles.noticeText}>{notice}</Text>
-            )}
-            {notice.length >= 150 && !isNoticeExpanded && (
-              <Text style={styles.noticePreview}>
-                {notice.substring(0, 150)}...
-                <Text style={styles.readMore}>Read more</Text>
-              </Text>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-      <MealPriceEditor role="user" />
-    </ScrollView>
+        {/* Notice */}
+        {showNotice && (
+          <Animated.View style={[styles.noticeBox, { opacity: fadeAnim }]}>
+            <TouchableOpacity
+              onPress={toggleNoticeExpansion}
+              activeOpacity={0.7}
+            >
+              <View style={styles.noticeHeader}>
+                <Text style={styles.noticeIcon}>📢</Text>
+                <Text style={styles.noticeHeading}>Important Notice</Text>
+                <Text style={styles.expandIcon}>
+                  {isNoticeExpanded ? "▲" : "▼"}
+                </Text>
+              </View>
+              {(isNoticeExpanded || notice.length < 150) && (
+                <Text style={styles.noticeText}>{notice}</Text>
+              )}
+              {notice.length >= 150 && !isNoticeExpanded && (
+                <Text style={styles.noticePreview}>
+                  {notice.substring(0, 150)}...
+                  <Text style={styles.readMore}>Read more</Text>
+                </Text>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+        <MealPriceEditor role="user" />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
