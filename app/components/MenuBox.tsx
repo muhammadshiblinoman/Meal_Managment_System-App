@@ -5,15 +5,46 @@ import { StyleSheet, Text, View } from "react-native";
 
 export default function MenuBox() {
   const [menu, setMenu] = useState({ breakfast: "", lunch: "", dinner: "" });
-  
+
   useEffect(() => {
-    // Fetch tomorrow's menu
-    const menuRef = ref(db, "menu/tomorrow");
-    onValue(menuRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) setMenu(data);
-    });
+    const menuRef = ref(db, "/menu/weekly");
+
+    const unsubscribe = onValue(
+      menuRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          setMenu({ breakfast: "", lunch: "", dinner: "" });
+          return;
+        }
+        const entries = Array.isArray(data) ? data : Object.values(data);
+        const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+        const tomorrowIndex = (new Date().getDay() + 1) % 7;
+        const tomorrowKey = dayMap[tomorrowIndex];
+
+        const tomorrowEntry = entries.find(
+          (e: any) => (e?.day || "").toString().toLowerCase() === tomorrowKey
+        );
+
+        if (tomorrowEntry) {
+          setMenu({
+            breakfast: tomorrowEntry.breakfast || "",
+            lunch: tomorrowEntry.lunch || "",
+            dinner: tomorrowEntry.dinner || "",
+          });
+        } else {
+          setMenu({ breakfast: "", lunch: "", dinner: "" });
+        }
+      },
+      (error) => {
+        console.warn("Failed to read weekly menu:", error);
+        setMenu({ breakfast: "", lunch: "", dinner: "" });
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
+ 
 
   return (
     <View style={styles.container}>

@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   saveButton: {
-    backgroundColor: "#0d6efd",
+    backgroundColor: "#5A3E2B",
     padding: 14,
     borderRadius: 12,
     alignItems: "center",

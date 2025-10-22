@@ -33,6 +33,15 @@ export default function LoginScreen() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Login Failed", "Please enter both email and password.");
+      return;
+    }
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      Alert.alert("Login Failed", "Please enter a valid email address.");
+      return;
+    }
+
     try {
       setIsLoading(true);
       const userCredential = await signInWithEmailAndPassword(
@@ -57,9 +66,11 @@ export default function LoginScreen() {
         }
       } else {
         Alert.alert("Login Failed", "User data not found.");
+        auth.signOut();
       }
     } catch (error: any) {
       Alert.alert("Login Failed", "Wrong email or password. Please try again.");
+      auth.signOut();
     } finally {
       setIsLoading(false);
     }
@@ -200,7 +211,10 @@ export default function LoginScreen() {
 
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={() => setShowRoleModal(false)}
+                  onPress={() =>{
+                    setShowRoleModal(false);
+                    auth.signOut();
+                  }}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
@@ -232,6 +246,16 @@ export default function LoginScreen() {
                 <TouchableOpacity
                   style={[styles.roleButton, styles.adminButton]}
                   onPress={async () => {
+                    Keyboard.dismiss();
+                    if (!resetEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                      Alert.alert("Validation Error", "Enter a valid email.");
+                      return;
+                    }
+                    if (!resetEmail) {
+                      Alert.alert("Validation Error", "Email is required.");
+                      return;
+                    }
+
                     try {
                       await sendPasswordResetEmail(auth, resetEmail);
                       Alert.alert(

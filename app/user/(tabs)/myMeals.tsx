@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // Fixed date generation function
 const getCurrentMonthDates = () => {
@@ -98,7 +97,6 @@ export default function MyMeals() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ScrollView
         style={styles.container}
         refreshControl={
@@ -212,7 +210,6 @@ export default function MyMeals() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 }
 
