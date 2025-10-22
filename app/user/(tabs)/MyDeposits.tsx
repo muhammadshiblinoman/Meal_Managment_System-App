@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DepositEntry {
   amount: number;
@@ -110,7 +109,6 @@ export default function MyDeposits() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ScrollView
         style={styles.container}
         refreshControl={
@@ -178,7 +176,6 @@ export default function MyDeposits() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 }
 

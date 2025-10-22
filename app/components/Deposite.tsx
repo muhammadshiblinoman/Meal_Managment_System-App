@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   depositButton: {
-    backgroundColor: "#0d6efd",
+    backgroundColor: "#5A3E2B",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",

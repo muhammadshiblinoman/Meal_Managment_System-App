@@ -122,7 +122,6 @@ export default function SignupScreen() {
                 value={room}
                 onChangeText={setRoom}
                 style={styles.input}
-                keyboardType="numeric"
               />
             </View>
 
@@ -155,7 +154,7 @@ export default function SignupScreen() {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                placeholder="Create a password (min. 6 characters)"
+                placeholder="Password (min. 6 characters)"
                 placeholderTextColor="#A9A9A9"
                 value={password}
                 onChangeText={setPassword}
@@ -205,6 +204,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: "#FFF8F0", // Off-white/cream background
     padding: 20,
+    paddingBottom: 50,
   },
   logoContainer: {
     alignItems: "center",
