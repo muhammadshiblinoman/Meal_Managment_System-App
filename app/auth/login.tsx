@@ -1,9 +1,9 @@
 import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import {
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
+  signInWithEmailAndPassword
 } from "firebase/auth";
 import { get, ref } from "firebase/database";
 import { useState } from "react";
@@ -28,7 +28,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -54,8 +53,6 @@ export default function LoginScreen() {
       const snapshot = await get(ref(db, "users/" + user.uid));
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setUserData(data);
-
         if (data.role === "admin") {
           // Show modal for admin to choose role
           setShowRoleModal(true);
@@ -76,8 +73,14 @@ export default function LoginScreen() {
     }
   };
 
-  const handleRoleSelection = (role: string) => {
+  const handleRoleSelection = async (role: string) => {
     setShowRoleModal(false);
+    try {
+      await AsyncStorage.setItem("adminLoginMode", role);
+    } catch (error) {
+      console.error("Failed to save login mode:", error);
+    }
+
     if (role === "admin") {
       router.replace("/admin/(tabs)");
     } else {
@@ -108,7 +111,9 @@ export default function LoginScreen() {
               </View>
             </View>
             <Text style={styles.appTitle}>Meal Manager</Text>
-            <Text style={styles.appSubtitle}>Make Easy Your Meal Management</Text>
+            <Text style={styles.appSubtitle}>
+              Make Easy Your Meal Management
+            </Text>
           </View>
 
           <View style={styles.formContainer}>
@@ -211,7 +216,7 @@ export default function LoginScreen() {
 
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={() =>{
+                  onPress={() => {
                     setShowRoleModal(false);
                     auth.signOut();
                   }}
@@ -257,13 +262,6 @@ export default function LoginScreen() {
                     }
 
                     try {
-                      await sendPasswordResetEmail(auth, resetEmail);
-                      Alert.alert(
-                        "Success",
-                        "Reset email sent. Check your inbox."
-                      );
-                      setShowForgotModal(false);
-                      setResetEmail("");
                     } catch (error: any) {
                       Alert.alert("Error", "Failed to send reset email.");
                     }

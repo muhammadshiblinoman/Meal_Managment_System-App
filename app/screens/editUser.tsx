@@ -26,7 +26,6 @@ export default function EditUser() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [balance, setBalance] = useState(0);
-  const [totmeals, setTotmeals] = useState(0);
   const [role, setRole] = useState("user");
   const [status, setStatus] = useState("active");
 
@@ -50,7 +49,6 @@ export default function EditUser() {
         setPhone(data.phone || "");
         setEmail(data.email || "");
         setBalance(data.balance || 0);
-        setTotmeals(data.totmeals || 0);
         setRole(data.role || "user");
         setStatus(data.status || "active");
       }
@@ -82,7 +80,6 @@ export default function EditUser() {
               phone,
               email,
               balance,
-              totmeals,
               role,
               status,
             });
@@ -160,47 +157,6 @@ export default function EditUser() {
                 maxLength={11}
               />
             </View>
-
-            {/* <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email Address</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter email address"
-                placeholderTextColor="#A9A9A9"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Account Balance</Text>
-              <TextInput
-                style={styles.input}
-                value={balance.toString()}
-                onChangeText={(text) => setBalance(Number(text))}
-                placeholder="Enter balance amount"
-                placeholderTextColor="#A9A9A9"
-                keyboardType="numeric"
-              />
-            </View> */}
-
-            {/* {moderator === "admin" && (
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>User Role</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={role}
-                    onValueChange={setRole}
-                    style={styles.picker}
-                  >
-                    <Picker.Item label="User" value="user" />
-                    <Picker.Item label="Admin" value="admin" />
-                  </Picker>
-                </View>
-              </View>
-            )} */}
 
             {/* Action Buttons */}
             <View style={styles.actionsContainer}>

@@ -3,32 +3,52 @@ import MenuBox from "@/app/components/MenuBox";
 import { useNotifications } from "@/app/hooks/useNotificaions";
 import { auth, db } from "@/firebaseConfig";
 import { onValue, ref, set } from "firebase/database";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Animated,
   ScrollView,
   StyleSheet,
   Text,
-  View
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function Index() {
   const { permissionStatus, scheduleLocalNotification } = useNotifications();
+  const [notice, setNotice] = useState("");
+  const [showNotice, setShowNotice] = useState(false);
+  const [isNoticeExpanded, setIsNoticeExpanded] = useState(false);
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
     notificationHandler();
+    Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+     
   }, [permissionStatus]);
 
-
+  const toggleNoticeExpansion = () => {
+    setIsNoticeExpanded(!isNoticeExpanded);
+  };
 
   const notificationHandler = () => {
     if (permissionStatus === "not-on-device") {
-      Alert.alert("Emulator Detected", "Notifications work only on real devices.");
+      Alert.alert(
+        "Emulator Detected",
+        "Notifications work only on real devices."
+      );
       return;
     }
 
     if (permissionStatus && permissionStatus !== "granted") {
-      Alert.alert("Permissions Needed", "Please enable notification permissions.");
+      Alert.alert(
+        "Permissions Needed",
+        "Please enable notification permissions."
+      );
       return;
     }
 
@@ -43,7 +63,8 @@ export default function Index() {
 
         const uid = auth?.currentUser?.uid;
         if (!uid) return;
-
+        setNotice(data.text || "");
+        setShowNotice(true);
         // Check visited map and skip if already seen
         const visited = data?.visited || {};
         const alreadySeen = visited[uid] === true;
@@ -78,8 +99,31 @@ export default function Index() {
       <View style={styles.section}>
         <MenuBox />
       </View>
-
       <MealSelector />
+
+      
+      {showNotice && (
+        <Animated.View style={[styles.noticeBox, { opacity: fadeAnim }]}>
+          <TouchableOpacity onPress={toggleNoticeExpansion} activeOpacity={0.7}>
+            <View style={styles.noticeHeader}>
+              <Text style={styles.noticeIcon}>📢</Text>
+              <Text style={styles.noticeHeading}>Important Notice</Text>
+              <Text style={styles.expandIcon}>
+                {isNoticeExpanded ? "▲" : "▼"}
+              </Text>
+            </View>
+            {(isNoticeExpanded || notice.length < 150) && (
+              <Text style={styles.noticeText}>{notice}</Text>
+            )}
+            {notice.length >= 150 && !isNoticeExpanded && (
+              <Text style={styles.noticePreview}>
+                {notice.substring(0, 150)}...
+                <Text style={styles.readMore}>Read more</Text>
+              </Text>
+            )}
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </ScrollView>
   );
 }

@@ -1,4 +1,5 @@
 import { auth, db } from "@/firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { signOut } from "firebase/auth";
 import { onValue, ref } from "firebase/database";
@@ -55,6 +56,8 @@ export default function Details({ moderator }: { moderator?: string }) {
           text: "Logout", 
           onPress: async () => {
             try {
+              // Clear admin login mode preference
+              await AsyncStorage.removeItem('adminLoginMode');
               await signOut(auth);
               router.replace("/auth/login");
             } catch (error: any) {
@@ -125,11 +128,6 @@ export default function Details({ moderator }: { moderator?: string }) {
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Account Balance</Text>
           <Text style={[styles.detailValue, styles.balanceValue]}>৳ {userData.balance.toFixed(2)}</Text>
-        </View>
-        
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Total Meals</Text>
-          <Text style={styles.detailValue}>{userData.totmeals}</Text>
         </View>
       </View>
 
