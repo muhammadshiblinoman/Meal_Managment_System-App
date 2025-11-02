@@ -12,13 +12,27 @@ export default function MealSelector() {
     dinner: false,
   });
   const [prices, setPrices] = useState({ breakfast: 0, lunch: 0, dinner: 0 });
+  const [mealDate, setMealDate] = useState("");
+  const [mealDeadline, setMealDeadline] = useState<{ hour: number; minute: number } | null>(null);
+
+  // 🕒 Fetch meal deadline from Firebase
+  const fetchMealDeadline = async () => {
+    try {
+      const deadlineRef = ref(db, "/settings/mealDeadline");
+      const snapshot = await get(deadlineRef);
+      if (snapshot.exists()) {
+        setMealDeadline(snapshot.val());
+      }
+    } catch (error) {
+      console.error("Failed to fetch meal deadline:", error);
+    }
+  };
 
   const getMealDate = () => {
     const now = new Date();
     const mealDate = new Date(now);
-    if (now.getHours() < 2) {
-      mealDate.setDate(now.getDate() - 1);
-    }
+    setMealDate(mealDate.toISOString().split("T")[0]);
+    mealDate.setDate(mealDate.getDate() + 1);
     return mealDate.toISOString().split("T")[0];
   };
 
@@ -59,7 +73,6 @@ export default function MealSelector() {
           return; // Cancel transaction
         }
 
-        // Atomic update of balance and meals
         userData.balance = updatedBalance;
         userData.meals = {
           ...(userData.meals || {}),
@@ -79,9 +92,24 @@ export default function MealSelector() {
     }
   };
 
+  // ✅ Check if current time is before deadline
+  const isBeforeDeadline = (): boolean => {
+    if (!mealDeadline) return true; // if not loaded yet, allow toggling
+
+    const now = new Date();
+    const deadline = new Date();
+    deadline.setHours(mealDeadline.hour, mealDeadline.minute, 0, 0);
+
+    return now.getTime() <= deadline.getTime();
+  };
+
   const toggleMeal = (key: "breakfast" | "lunch" | "dinner") => {
     if (status === "blocked") {
       Alert.alert("You are blocked", "Contact the Manager for more information");
+      return;
+    }
+    if (!isBeforeDeadline()) {
+      Alert.alert("Time Over", "Meal selection time has expired for today.");
       return;
     }
 
@@ -93,11 +121,12 @@ export default function MealSelector() {
     });
   };
 
-  useEffect(() => {
+  const fetchUserData = () => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
     fetchMealPrices();
+    fetchMealDeadline(); // ✅ also fetch deadline
 
     const userRef = ref(db, "users/" + uid);
     onValue(userRef, (snapshot) => {
@@ -117,19 +146,38 @@ export default function MealSelector() {
         });
       }
     });
-  }, []);
+  };
 
+  useEffect(() => {
+    fetchUserData();
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Select Meals</Text>
-        <View style={styles.balanceContainer}>
+        <TouchableOpacity 
+          style={styles.balanceContainer}
+          onPress={() => {
+            setUser({ ...user, loading: true });
+            fetchUserData();
+          }}
+        >
           <Text style={styles.balanceText}>
-            Balance: ৳{user?.balance?.toFixed(2) || "0.00"}
+            {user?.loading ? "Loading..." : `Balance: ৳${user?.balance?.toFixed(2) || "0.00"}`}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
-
+      <Text style={styles.dateText}>
+        For{" "}
+        {new Date(
+          new Date(mealDate).getTime() + 24 * 60 * 60 * 1000
+        ).toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+      </Text>
       <View style={styles.mealSelectionBox}>
         <View style={styles.mealRow}>
           <TouchableOpacity
@@ -257,5 +305,12 @@ const styles = StyleSheet.create({
   },
   mealIcon: {
     fontSize: 24,
+  },
+  dateText: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 0,
+    color: "#6c757d",
+    fontSize: 14,
   },
 });

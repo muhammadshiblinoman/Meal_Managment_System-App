@@ -1,7 +1,4 @@
-import { auth, db } from '@/firebaseConfig';
 import { useRouter } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { get, ref } from 'firebase/database';
 import { useEffect, useRef } from 'react';
 import {
   Animated,
@@ -40,39 +37,9 @@ export default function Index() {
       })
     ]).start();
 
-    const timer = setTimeout(() => {
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          // User is signed in, check role and navigate
-          try {
-            const snapshot = await get(ref(db, "users/" + user.uid));
-            if (snapshot.exists()) {
-              const data = snapshot.val();
-              if (data.role === "admin") {
-                // You can store a preference for admin vs user mode
-                // For now, default to admin tab
-                router.replace("/admin/(tabs)");
-              } else {
-                router.replace("/user/(tabs)");
-              }
-            } else {
-              // No user data, sign out and go to login
-              await auth.signOut();
-              router.replace("/auth/login");
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error);
-            await auth.signOut();
-            router.replace("/auth/login");
-          }
-        } else {
-          // No user signed in, go to login
-          router.replace("/auth/login");
-        }
-      });
-
-      return unsubscribe;
-    }, 2000);
+     const timer = setTimeout(() => {
+      router.replace('/auth/login');
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
