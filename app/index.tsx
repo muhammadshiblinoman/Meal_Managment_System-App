@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import {
-    Animated,
-    Easing,
-    Image,
-    StyleSheet,
-    Text,
-    View
+  Animated,
+  Easing,
+  Image,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 
 export default function Index() {
@@ -37,10 +37,9 @@ export default function Index() {
       })
     ]).start();
 
-    // Redirect to login after 2 seconds
-    const timer = setTimeout(() => {
+     const timer = setTimeout(() => {
       router.replace('/auth/login');
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);

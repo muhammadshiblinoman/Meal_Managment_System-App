@@ -116,12 +116,12 @@ export default function MealCountSummary() {
 
       <Text style={styles.dateText}>
         For{" "}
-        {new Date(mealDate).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
+        {new Date(new Date(mealDate).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
       </Text>
 
       <View style={styles.content}>
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   mealTotal: {
     fontWeight: "600",
-    color: "#0d6efd",
+    color: "#5A3E2B",
     minWidth: 40,
     textAlign: "right",
   },
@@ -267,11 +267,11 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0a58ca",
+    color: "#5A3E2B",
   },
   totalAmount: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0a58ca",
+    color: "#5A3E2B",
   },
 });

@@ -1,8 +1,8 @@
 import DepositComponent from "@/app/components/Deposite";
 import MealCountSummary from "@/app/components/MealCountSummary";
+import MealDeadlineEditor from "@/app/components/MealDeadLineEditor";
 import MealPriceEditor from "@/app/components/MealPriceEditor";
 import NoticePublisher from "@/app/components/NoticePublisher";
-import TomorrowMenuEditor from "@/app/components/TomorrowMenuEditor";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -13,9 +13,9 @@ export default function Index() {
         <Text style={styles.headerTitle}>Meal Manager</Text>
         <Text style={styles.headerSubtitle}>Admin Dashboard</Text>
       </View>
-      <TomorrowMenuEditor />
       <MealCountSummary />
       <DepositComponent />
+      <MealDeadlineEditor />
       <NoticePublisher />
       <MealPriceEditor role="admin" />
     </ScrollView>

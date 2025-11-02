@@ -1,10 +1,11 @@
-import MealPriceEditor from "@/app/components/MealPriceEditor";
 import MealSelector from "@/app/components/MealSelector";
 import MenuBox from "@/app/components/MenuBox";
-import { db } from "@/firebaseConfig";
-import { onValue, ref } from "firebase/database";
+import { useNotifications } from "@/app/hooks/useNotificaions";
+import { auth, db } from "@/firebaseConfig";
+import { onValue, ref, set } from "firebase/database";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Animated,
   ScrollView,
   StyleSheet,
@@ -12,84 +13,118 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const { permissionStatus, scheduleLocalNotification } = useNotifications();
   const [notice, setNotice] = useState("");
   const [showNotice, setShowNotice] = useState(false);
   const [isNoticeExpanded, setIsNoticeExpanded] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
-    // Fetch notice
-    const noticeRef = ref(db, "notice");
-    onValue(noticeRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data?.published) {
-        setNotice(data.text);
-        setShowNotice(true);
-
-        // Animate notice appearance
-        Animated.timing(fadeAnim, {
+    notificationHandler();
+    Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 500,
           useNativeDriver: true,
         }).start();
-      } else {
-        setShowNotice(false);
-      }
-    });
-  }, []);
+     
+  }, [permissionStatus]);
 
   const toggleNoticeExpansion = () => {
     setIsNoticeExpanded(!isNoticeExpanded);
   };
 
+  const notificationHandler = () => {
+    if (permissionStatus === "not-on-device") {
+      Alert.alert(
+        "Emulator Detected",
+        "Notifications work only on real devices."
+      );
+      return;
+    }
+
+    if (permissionStatus && permissionStatus !== "granted") {
+      Alert.alert(
+        "Permissions Needed",
+        "Please enable notification permissions."
+      );
+      return;
+    }
+
+    if (permissionStatus === "granted") {
+      const noticeRef = ref(db, "notice");
+      const unsubscribe = onValue(noticeRef, async (snapshot) => {
+        if (!snapshot.exists()) return;
+        const data: any = snapshot.val();
+
+        // Only act when published is true
+        if (!data?.published) return;
+
+        const uid = auth?.currentUser?.uid;
+        if (!uid) return;
+        setNotice(data.text || "");
+        setShowNotice(true);
+        // Check visited map and skip if already seen
+        const visited = data?.visited || {};
+        const alreadySeen = visited[uid] === true;
+        if (alreadySeen) return;
+
+        try {
+          // Show local notification with the notice text
+          const sent = await scheduleLocalNotification("New Notice", data.text);
+
+          // If notification was scheduled/sent, mark this uid as visited
+          if (sent) {
+            await set(ref(db, `notice/visited/${uid}`), true);
+          }
+        } catch (error) {
+          console.error("Error sending notice notification:", error);
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
-      <ScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Meal Manager</Text>
-          <Text style={styles.headerSubtitle}>User Dashboard</Text>
-        </View>
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Meal Manager</Text>
+        <Text style={styles.headerSubtitle}>User Dashboard</Text>
+      </View>
 
-        {/* Menu Box */}
-        <View style={styles.section}>
-          <MenuBox />
-        </View>
+      {/* Menu Box */}
+      <View style={styles.section}>
+        <MenuBox />
+      </View>
+      <MealSelector />
 
-        <MealSelector />
-
-        {/* Notice */}
-        {showNotice && (
-          <Animated.View style={[styles.noticeBox, { opacity: fadeAnim }]}>
-            <TouchableOpacity
-              onPress={toggleNoticeExpansion}
-              activeOpacity={0.7}
-            >
-              <View style={styles.noticeHeader}>
-                <Text style={styles.noticeIcon}>📢</Text>
-                <Text style={styles.noticeHeading}>Important Notice</Text>
-                <Text style={styles.expandIcon}>
-                  {isNoticeExpanded ? "▲" : "▼"}
-                </Text>
-              </View>
-              {(isNoticeExpanded || notice.length < 150) && (
-                <Text style={styles.noticeText}>{notice}</Text>
-              )}
-              {notice.length >= 150 && !isNoticeExpanded && (
-                <Text style={styles.noticePreview}>
-                  {notice.substring(0, 150)}...
-                  <Text style={styles.readMore}>Read more</Text>
-                </Text>
-              )}
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-        <MealPriceEditor role="user" />
-      </ScrollView>
-    </SafeAreaView>
+      
+      {showNotice && (
+        <Animated.View style={[styles.noticeBox, { opacity: fadeAnim }]}>
+          <TouchableOpacity onPress={toggleNoticeExpansion} activeOpacity={0.7}>
+            <View style={styles.noticeHeader}>
+              <Text style={styles.noticeIcon}>📢</Text>
+              <Text style={styles.noticeHeading}>Important Notice</Text>
+              <Text style={styles.expandIcon}>
+                {isNoticeExpanded ? "▲" : "▼"}
+              </Text>
+            </View>
+            {(isNoticeExpanded || notice.length < 150) && (
+              <Text style={styles.noticeText}>{notice}</Text>
+            )}
+            {notice.length >= 150 && !isNoticeExpanded && (
+              <Text style={styles.noticePreview}>
+                {notice.substring(0, 150)}...
+                <Text style={styles.readMore}>Read more</Text>
+              </Text>
+            )}
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+    </ScrollView>
   );
 }
 
